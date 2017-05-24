@@ -11,8 +11,8 @@
 
 // 这个数据类型用于存储每一个顶点数据
 typedef struct {
-    GLKVector3 positionCoords;
-    GLKVector2 textureCoords;
+    GLKVector3 positionCoords;  // 顶点数据
+    GLKVector2 textureCoords;   // 纹理坐标
 } SceneVertex;
 
 
@@ -22,7 +22,12 @@ static const SceneVertex vertices[] =
 {
     {{-0.5, -0.5, 0.0}, {0.0, 0.0}},  // 左下
     {{ 0.5, -0.5, 0.0}, {1.0, 0.0}},  // 右下
-    {{-0.5,  0.5, 0.0}, {0.0, 1.0}}  // 左上
+    {{-0.5,  0.5, 0.0}, {0.0, 1.0}},  // 左上
+    // 解决图片只有一半显示的问题 begin
+    {{ 0.5, -0.5, 0.0}, {1.0, 0.0}},
+    {{-0.5,  0.5, 0.0}, {0.0, 1.0}},
+    {{ 0.5,  0.5, 0.0}, {1.0, 1.0}}
+    // 解决图片只有一半显示的问题 end
 };
 
 
@@ -75,17 +80,38 @@ static const SceneVertex vertices[] =
     // ============================================
     // 绘制纹理新增 begin
     // ============================================
+    // 读入需要绘制的图片的CGImageRef内容
+    // 毕竟OpenGL是基于C++的嘛，你直接给一个UIImage人怎么识别
     CGImageRef imageRefTulip = [UIImage imageNamed:@"tulip"].CGImage;
     
+    // 使用GLKTextureLoader（纹理读取）从上边得到的imageRefTulip读取纹理信息
+    // 解决纹理倒置问题 begin
+//    GLKTextureInfo *textureInfoTulip = [GLKTextureLoader textureWithCGImage:imageRefTulip
+//                                                                    options:nil
+//                                                                      error:nil];
     GLKTextureInfo *textureInfoTulip = [GLKTextureLoader textureWithCGImage:imageRefTulip
-                                                               options:nil
-                                                                 error:nil];
+                                                                    options:@{GLKTextureLoaderOriginBottomLeft: @(YES)}
+                                                                      error:nil];
+    // 解决纹理倒置问题 end
     
+    // 将读取到的纹理信息缓存到baseEffec的texture2d0中
     self.baseEffect.texture2d0.name = textureInfoTulip.name;
     self.baseEffect.texture2d0.target = textureInfoTulip.target;
     // ============================================
     // 绘制纹理新增 end
     // ============================================
+    
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//    
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//    
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//    
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
 
